@@ -10,6 +10,13 @@ static const Complex focusPoint = {
 pthread_mutex_t threadMutexLock;
 
 
+void printParameters() {
+	printf("Parameters:\n");
+	printf("	Image dimensions: %d x %d\n", IMG_WIDTH, IMG_HEIGHT);
+	printf("	Max iterations: %d\n", MAX_ITERATIONS);
+	printf("	Sector count (each thread does 1 sector): %d\n\n", (DIV_HEIGHT * DIV_WIDTH));
+}
+
 void generate() {
 	Pixel* pixels = new Pixel[IMG_HEIGHT * IMG_WIDTH];
 	Pixel* colors = new Pixel[MAX_ITERATIONS + 1];
@@ -40,8 +47,6 @@ void generate() {
 		threadCount = DIV_WIDTH * DIV_HEIGHT;
 		
 	int (*numThread)[4] = new int[threadCount][4];
-
-	printf("Working with %d threads\n", threadCount);
 
 	int imgY = 0;
 	while (imgY < IMG_HEIGHT) {
@@ -81,9 +86,7 @@ void generate() {
 
 		threadArguments[i] = currentThreadArguments;
 
-		printf("Created thread %d\n", i);
-
-		pthread_create(&threads[i], NULL, workerThreadExecute, &threadArguments[i]);
+		pthread_create(&threads[i], NULL, threadFunction, &threadArguments[i]);
 	}
 
 	// Wait for threads to complete
@@ -97,15 +100,18 @@ void generate() {
     fwrite(pixels, sizeof(Pixel), IMG_WIDTH * IMG_HEIGHT, fp);
     fclose(fp);
 
+	printf("Image MandelbrotSet.ppm created.\n");
+	printf("Destroying mutex...\n");
+
     pthread_mutex_destroy(&threadMutexLock);
 }
 
-void* workerThreadExecute(void* threadArguments) {
+void* threadFunction(void* threadArguments) {
 	ThreadArguments* args = static_cast<ThreadArguments*>(threadArguments);
 
 	const clock_t startTime = clock();
 
-	printf("INFO: Thread %d started.\n", args -> threadId);
+	printf("[Thread %d]: Started\n", args -> threadId);
 
 	for (int y = args -> startY; (y < args -> endY) && (y < IMG_HEIGHT); y++)
 		for (int x = args -> startX; (x < args -> endX) && (x < IMG_WIDTH); x++) {
@@ -148,7 +154,7 @@ void* workerThreadExecute(void* threadArguments) {
 		}
 	
 	printf(
-		"INFO: Thread %d ended after %d seconds.\n",
+		"[Thread %d] Ended at %d seconds\n",
 		args -> threadId,
 		(int) ((clock() - startTime) / CLOCKS_PER_SEC)
 	);
