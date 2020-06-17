@@ -1,0 +1,23 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+		{
+            "type": "shell",
+            "label": "G++ Linux",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-g",
+                "${workspaceFolder}/src/*.cpp",
+				"-o",
+                "a.out",
+                "-I",
+				"${workspaceFolder}/src/",
+				"-lpthread"
+            ],
+            "options": {
+                "cwd": "/usr/bin"
+			},
+			"group": "build"
+        }
+	]
+}

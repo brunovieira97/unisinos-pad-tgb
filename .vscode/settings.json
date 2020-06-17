@@ -1,0 +1,15 @@
+{
+	"files.associations": {
+		".gitconfig.*": "properties",
+		"cmath": "cpp",
+		"cstdio": "cpp",
+		"cstdlib": "cpp",
+		"type_traits": "cpp",
+		"iostream": "cpp",
+		"istream": "cpp",
+		"limits": "cpp",
+		"ostream": "cpp",
+		"*.tcc": "cpp"
+	},
+	"C_Cpp.errorSquiggles": "Enabled"
+}
