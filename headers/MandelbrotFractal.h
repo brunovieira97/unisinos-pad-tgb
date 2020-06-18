@@ -36,9 +36,9 @@ struct Complex {
 static const int
 	DIV_HEIGHT			= 100,	// Vertical divisions
 	DIV_WIDTH			= 100,	// Horizontal divisions
-	IMG_HEIGHT			= 10000,	// PPM image height
-	IMG_WIDTH			= 10000,	// PPM image width
-	MAX_ITERATIONS		= 1024;	// Maximum number of iterations
+	IMG_HEIGHT			= 5000,	// PPM image height
+	IMG_WIDTH			= 5000,	// PPM image width
+	MAX_ITERATIONS		= 100;	// Maximum number of iterations
 
 static const unsigned char MAX_RGB_VALUE = 255;
 static const double ZOOM = 2;
