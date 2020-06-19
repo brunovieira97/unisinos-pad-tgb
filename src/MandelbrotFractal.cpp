@@ -41,21 +41,22 @@ void generate() {
 		};
 
 	int
-		qtdX = (IMG_WIDTH / DIV_WIDTH),
-		qtdY = (IMG_HEIGHT / DIV_HEIGHT),
+		qtdX = (IMG_WIDTH / DIV_WIDTH),			// Width of each sector
+		qtdY = (IMG_HEIGHT / DIV_HEIGHT),		// Height of each sector
 		tmpCont = 0,
-		threadCount = DIV_WIDTH * DIV_HEIGHT;
+		threadCount = DIV_WIDTH * DIV_HEIGHT;	// Sector count
 		
 	int (*numThread)[4] = new int[threadCount][4];
 
+	// Fill array with each sector's boundaries (startX, endX, startY and endY)
 	int imgY = 0;
 	while (imgY < IMG_HEIGHT) {
 		int imgX = 0;
 		while (imgX < IMG_WIDTH) {
-			numThread[tmpCont][0] = imgX;
-			numThread[tmpCont][1] = imgY;
-			numThread[tmpCont][2] = imgX + qtdX;
-			numThread[tmpCont][3] = imgY + qtdY;
+			numThread[tmpCont][0] = imgX;			// startX
+			numThread[tmpCont][1] = imgY;			// startY
+			numThread[tmpCont][2] = imgX + qtdX;	// endX
+			numThread[tmpCont][3] = imgY + qtdY;	// endY
 
 			tmpCont++;
 			imgX += qtdX;
@@ -64,13 +65,15 @@ void generate() {
 		imgY += qtdY;
 	}
 
-	pthread_t* threads = new pthread_t[threadCount];
-	ThreadArguments* threadArguments = new ThreadArguments[threadCount];
+	// Parallel from here!
+	pthread_t* threads = new pthread_t[threadCount];						// Thread list
+	ThreadArguments* threadArguments = new ThreadArguments[threadCount];	// Thread arguments list
 
 	for (int i = 0; i < threadCount; i++) {
 		ThreadArguments currentThreadArguments = {
 			.threadId = i,
 
+			// Fetch boundaries of sector from numThread array
 			.startX = numThread[i][0],
 			.endX = numThread[i][2],
 			.startY = numThread[i][1],
@@ -86,6 +89,7 @@ void generate() {
 
 		threadArguments[i] = currentThreadArguments;
 
+		// Create worker thread
 		pthread_create(&threads[i], NULL, threadFunction, &threadArguments[i]);
 	}
 
@@ -113,6 +117,8 @@ void* threadFunction(void* threadArguments) {
 
 	printf("[Thread %d]: Started\n", args -> threadId);
 
+	// NEW: Use sector boundaries so it calculates only pixels of this sector,
+	// so each thread works only on its part
 	for (int y = args -> startY; (y < args -> endY) && (y < IMG_HEIGHT); y++)
 		for (int x = args -> startX; (x < args -> endX) && (x < IMG_WIDTH); x++) {
 			Complex c = {
@@ -144,13 +150,16 @@ void* threadFunction(void* threadArguments) {
 				iterations++;
 			}
 
-			pthread_mutex_lock(&threadMutexLock);
+			// NEW: Using mutex to avoid critical region problems
+			// e.g.: 2 threads trying to record on same array simultaneously
+			// pthread_mutex_lock(&threadMutexLock);	// Critical region begin
 
+			// Pass correct color for each pixel
 			args -> pixels[y * IMG_WIDTH + x][0] = args -> colors[iterations][0];
 			args -> pixels[y * IMG_WIDTH + x][1] = args -> colors[iterations][1];
 			args -> pixels[y * IMG_WIDTH + x][2] = args -> colors[iterations][2];
 
-			pthread_mutex_unlock(&threadMutexLock);
+			// pthread_mutex_unlock(&threadMutexLock);	// Critical region end
 		}
 	
 	printf(
