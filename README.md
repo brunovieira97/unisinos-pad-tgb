@@ -1,4 +1,4 @@
-# Mandelbrot Fractal / CPU Killer
+# Mandelbrot Fractal
 
 Trabalho do Grau B da disciplina Processamento de Alto Desempenho. Unisinos, 2020.
 
